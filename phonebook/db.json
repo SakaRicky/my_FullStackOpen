@@ -1,0 +1,24 @@
+{
+  "persons": [
+    {
+      "name": "Arto Hellas",
+      "number": "040-1234567",
+      "id": 1
+    },
+    {
+      "name": "Ricky Saka",
+      "number": "698425147",
+      "id": 2
+    },
+    {
+      "name": "Rheine Kwato",
+      "number": "673572219",
+      "id": 3
+    },
+    {
+      "name": "Lionel Saka",
+      "number": "040-1234567",
+      "id": 4
+    }
+  ]
+}
