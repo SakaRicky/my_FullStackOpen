@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const baseUrl = "http://localhost:3001/persons"
+const baseUrl = "/api/persons"
+
+// server for developping the frontend
+// const baseUrl = "http://localhost:3001/persons"
 
 const getAll = () => {
     const request = axios.get(baseUrl)
@@ -19,6 +22,11 @@ const update = (id, newContact) => {
 
 const remove = id => {
     const request = axios.delete(`${baseUrl}/${id}`)
+    
+    request.then(response => {
+        console.log(response);
+    })
+    
     return request.then(response => response.data)
 }
 

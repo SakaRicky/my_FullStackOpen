@@ -4,14 +4,18 @@ import Person from './components/Person';
 import Filter from './components/Filter';
 import PersonForm from './components/PersonForm';
 import phonebookService from './services/phonebook';
+import Notification from './components/Notification';
+import './index.css'
 
 const App = () => {
   const [ persons, setPersons ] = useState([]);
   const [ newName, setNewName ] = useState('');
   const [newNumber, setNewNumber] = useState('');
   const [filter, setFilter] = useState('');
+  const [notificationMessage, setNotificationMessage] = useState(null)
+  const [messageNature, setMessageNature] = useState('')
 
-  const personsList = persons.map(p => p.name);
+  // const personsList = persons.map(p => p.name);
 
   const personsFiltered = filter ? persons.filter(person => person.name.toUpperCase().includes(filter.toUpperCase())) : [...persons];
 
@@ -20,6 +24,14 @@ const App = () => {
       .getAll()
       .then(allContacts => {
         setPersons(allContacts);
+        setNotificationMessage(null);
+      })
+      .catch(error => {
+        setNotificationMessage(error.response.data.message);
+        setMessageNature('error')
+        setTimeout(() => {
+          setNotificationMessage(null)
+        }, 5000)
       })
       }, [])
 
@@ -42,36 +54,79 @@ const App = () => {
       number: newNumber
     }
 
-    if (personsList.includes(newName)) {
-      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
-        const contact = persons.find(person => person.name === newName);
-        const updatedContact = {...contact, number: newNumber}
+    // Check if the person's name is already in cantact list
+    // In which case just update the person.
+    if (persons.map(p => p.name).includes(newName)) {
+      if (window.confirm(`Do you really want to modify ${newName}?`)) {
+        const person = persons.find(person => person.name === newName)
         phonebookService
-          .update(contact.id, updatedContact)
-          .then(addedContact => {
-                    const filtered = persons.filter(contact => contact.name !== newName)
-                    setPersons(filtered.concat(addedContact))
-                  })
+          .update(person.id, newPerson)
+          .then(modifiedContact => {
+            // filter out the contact to modify so as to set the new one in the list
+            const remainingPersons = persons.filter(person => person.name !== newName);
+            setPersons(remainingPersons.concat(modifiedContact));
+            setMessageNature('sucess');
+            setNotificationMessage(`Modified ${modifiedContact.name}`)
+            setTimeout(() => {
+              setNotificationMessage(null)
+            }, 5000)
+          })
+          .catch(error => {
+            setNotificationMessage(error.response.data.message);
+            setMessageNature('error')
+            setTimeout(() => {
+              setNotificationMessage(null)
+            }, 5000)
+          })
       }
-    } else {
+      return 
+    }else if (persons.map(p => p.number).includes(newNumber)) {
+      if (window.confirm(`Do you really want to modify ${newName}?`)) {
+        const person = persons.find(person => person.number === newNumber)
+        phonebookService
+          .update(person.id, newPerson)
+          .then(modifiedContact => {
+            // filter out the contact to modify so as to set the new one in the list
+            const remainingPersons = persons.filter(person => person.number !== newNumber);
+            setPersons(remainingPersons.concat(modifiedContact));
+            setMessageNature('sucess');
+            setNotificationMessage(`Modified ${modifiedContact.name}`)
+            setTimeout(() => {
+              setNotificationMessage(null)
+            }, 5000)
+          })
+          .catch(error => {
+            setNotificationMessage(error.response.data.message);
+            setMessageNature('error')
+            setTimeout(() => {
+              setNotificationMessage(null)
+            }, 5000)
+          })
+      }
+      return 
+    }
+
+
+
+
       phonebookService
         .create(newPerson)
         .then(addedContact => {
-          setPersons(persons.concat(addedContact))
+          setPersons(persons.concat(addedContact));
+          setMessageNature('sucess');
+          setNotificationMessage(`Added ${addedContact.name}`)
+          setTimeout(() => {
+            setNotificationMessage(null)
+          }, 5000)
+        })
+        .catch(error => {
+          setNotificationMessage(error.response.data.message);
+          setMessageNature('error')
+          setTimeout(() => {
+            setNotificationMessage(null)
+          }, 5000)
         });
-    }
 
-    
-    // personsList.includes(newName) ? phonebookService
-    //                                   .update(newPerson)
-    //                                   .then(addedContact => {
-    //                                     setPersons(persons.concat(addedContact))
-    //                                   }) :
-    //                                   phonebookService
-    //                                     .create(newPerson)
-    //                                     .then(addedContact => {
-    //                                       setPersons(persons.concat(addedContact))
-    //                                     });
   } 
 
   const deleteContactHandler = (contactName) => {
@@ -79,8 +134,14 @@ const App = () => {
     if (window.confirm(`Do you really want to delete ${contactName}?`)) {
       phonebookService
         .remove(contact.id)
-        .then(contacts => {
-          setPersons(persons.filter(person => person.id !== contact.id))
+        .then(contactRemoved => {
+          console.log("contactRemoved: ", contactRemoved);
+          setPersons(persons.filter(person => person.id !== contact.id));
+          setNotificationMessage(`Removed ${contactRemoved.name}`);
+          setMessageNature('sucess')
+          setTimeout(() => {
+            setNotificationMessage(null)
+          }, 5000)
       })
     }
     
@@ -89,6 +150,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+
+      <Notification message={notificationMessage} nature={messageNature} />
 
       <Filter change={handleFilterChange}/>
 
