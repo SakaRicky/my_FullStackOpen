@@ -1,0 +1,21 @@
+.error {
+    border: 5px solid red;
+    background-color: rgb(211, 195, 195);
+    border-radius: 10px;
+}
+
+.error p {
+    font-size: large;
+    color: red;
+}
+
+.success {
+    border: 5px solid rgb(70, 156, 77);
+    background-color: rgb(165, 189, 167);
+    border-radius: 10px;
+}
+
+.success p {
+    font-size: large;
+    color: rgb(70, 156, 77);
+}
